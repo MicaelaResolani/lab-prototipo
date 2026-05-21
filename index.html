@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedFlow LIS - Sistema Hospitalario Completo</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+    <div id="pantallaLogin" class="contenedor-pantalla">
+        <div class="login-box">
+            <h2>🧪 MedFlow LIS</h2>
+            <p>Sistema de Gestión de Laboratorio - Hospital Provincial</p>
+            <hr>
+            <label>Usuario / Matrícula Profesional:</label>
+            <input type="text" id="inputUsuario" placeholder="Ej: BIOQ-7482">
+            <label>Contraseña:</label>
+            <input type="password" id="inputPassword" placeholder="••••••••">
+            <button class="btn-primario" onclick="ejecutarLogin()">Iniciar Sesión</button>
+        </div>
+    </div>
+
+    <div id="pantallaSistema" class="contenedor-pantalla oculto">
+        
+        <div class="navbar">
+            <span>Hospital Provincial de Rosario | Terminal Lab_03</span>
+            <div class="navbar-derecha">
+                <span id="nombreProfesional" class="user-badge">👤 Bioquímico: </span>
+                <button class="btn-logout" onclick="volverAlLogin()">🚪 Cerrar Sesión</button>
+            </div>
+        </div>
+
+        <div class="layout-principal">
+            
+            <div class="panel-izquierdo">
+                <h3>📥 Órdenes Pendientes (HIS)</h3>
+                <p class="subtitulo">Pedidos enviados desde Consultorios / Guardia</p>
+                <div class="lista-pedidos" id="contenedorPedidos">
+                    </div>
+            </div>
+
+            <div class="panel-derecho">
+                <div id="mensajeSeleccion">
+                    <p>👈 Seleccioná una orden de la lista para procesar los resultados.</p>
+                </div>
+
+                <div id="areaTrabajo" class="oculto">
+                    <div class="cabecera-orden">
+                        <h3>📋 Protocolo Nro: <span id="protocoloActivo"></span></h3>
+                        <p><strong>Paciente:</strong> <span id="pacienteActivo"></span> | <strong>Médico:</strong> <span id="medicoActivo"></span></p>
+                        <p><strong>Análisis Solicitado:</strong> <span id="estudioActivo"></span></p>
+                    </div>
+
+                    <div class="tabla-resultados">
+                        <h4>📊 Validación de Valores Clínicos</h4>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Determinación</th>
+                                    <th>Valor Hallado</th>
+                                    <th>Unidades</th>
+                                    <th>Valores de Referencia (Argentina)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Sodio (Na+)</td>
+                                    <td><input type="number" id="valSodio" value="138"></td>
+                                    <td>mEq/L</td>
+                                    <td>135 - 145 mEq/L</td>
+                                </tr>
+                                <tr>
+                                    <td>Potasio (K+)</td>
+                                    <td><input type="number" id="valPotasio" value="6.2"></td>
+                                    <td>mEq/L</td>
+                                    <td>3.5 - 5.0 mEq/L</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="seccion-observaciones">
+                        <h4>✍️ Observaciones Clínicas & Desvío Técnico</h4>
+                        <p class="aclaracion">Este bloque es un canal privado interoperable. No se imprime en el formato del paciente.</p>
+                        
+                        <label>¿Sugerir repetición de análisis al médico?</label>
+                        <select id="selectRepeticion">
+                            <option value="NO">No corresponde repetición</option>
+                            <option value="SI">SÍ, se sugiere repetir muestra ⚠️</option>
+                        </select>
+
+                        <label>Comentarios del Bioquímico (Indicar causas/motivos si corresponde repetir):</label>
+                        <textarea id="comentariosBioq" placeholder="Escribí acá tus apreciaciones profesionales para el médico..."></textarea>
+                    </div>
+
+                    <div class="bloque-botones">
+                        <button class="btn-volver" onclick="volverAListaPendientes()">⬅️ Volver a la Lista</button>
+                        <div class="botones-derecha">
+                            <button class="btn-secundario" onclick="generarPdfPaciente()">🖨️ Previsualizar PDF</button>
+                            <button class="btn-exito" onclick="finalizarYEnviarProtocolo()">🚀 Validar y Despachar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="modalPdf" class="modal oculto">
+        <div class="documento-pdf">
+            <div class="pdf-cabecera">
+                <h2>HOSPITAL PROVINCIAL DE ROSARIO</h2>
+                <p>Servicio de Laboratorio Clínico y Bioquímica</p>
+            </div>
+            <hr>
+            <div class="pdf-datos">
+                <p><strong>Paciente:</strong> <span id="pdfPaciente"></span></p>
+                <p><strong>Protocolo:</strong> <span id="pdfProtocolo"></span> | <strong>Fecha:</strong> 19/05/2026</p>
+            </div>
+            <table class="pdf-tabla">
+                <thead>
+                    <tr>
+                        <th>ANÁLISIS</th>
+                        <th>RESULTADO</th>
+                        <th>VALORES DE REFERENCIA</th>
+                    </tr>
+                </thead>
+                <tbody id="pdfCuerpoTabla">
+                    </tbody>
+            </table>
+            <div class="pdf-firma">
+                <p>___________________________</p>
+                <p id="pdfFirmaProfesional"></p>
+                <p>Bioquímico Especialista</p>
+            </div>
+            <button class="btn-cerrar" onclick="cerrarPdf()">Cerrar Vista de Impresión</button>
+        </div>
+    </div>
+
+    <script src="logica.js"></script>
+</body>
+</html>
