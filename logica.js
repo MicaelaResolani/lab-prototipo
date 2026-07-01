@@ -1,4 +1,3 @@
-// BASE DE DATOS SIMULADA
 let ordenesPendientes = [
     { id: "2026-09482", paciente: "Juan Pérez", medico: "Dr. Gastón Rodríguez", estudio: "Ionograma Plasmático", sodio: 138, potasio: 6.2 },
     { id: "2026-09483", paciente: "Marta Gómez", medico: "Dra. Ana Milone", estudio: "Ionograma Plasmático", sodio: 142, potasio: 4.1 },
@@ -8,27 +7,32 @@ let ordenesPendientes = [
 let usuarioAutenticado = "";
 let indexOrdenActiva = null;
 
-// 1. LÓGICA DE INGRESO (LOGIN)
 function ejecutarLogin() {
     const usuario = document.getElementById("inputUsuario").value;
     if (usuario.trim() === "") {
         alert("Por favor, ingresá tu usuario o número de matrícula.");
         return;
     }
-    usuarioAutenticado = usuario;
-    document.getElementById("nombreProfesional").innerText = `🧪 Bioquímico: ${usuarioAutenticado}`;
+    usuarioAutenticado = usuario.trim();
     
-    // Mostramos el sistema
+    // Identificamos dinámicamente el rol del usuario para corregir el error del badge
+    let rolDetectado = "Profesional";
+    if (usuarioAutenticado.includes("medico")) {
+        rolDetectado = "Médico";
+    } else if (usuarioAutenticado.includes("lab") || usuarioAutenticado.includes("bioq")) {
+        rolDetectado = "Bioquímico";
+    }
+    
+    document.getElementById("nombreProfesional").innerText = `👤 ${rolDetectado}: ${usuarioAutenticado}`;
+    
     document.getElementById("pantallaLogin").classList.add("oculto");
     document.getElementById("pantallaSistema").classList.remove("oculto");
     
-    // 🔥 LE AVISAMOS AL NAVEGADOR QUE AVANZAMOS: Activamos su flecha de atrás
     history.pushState({ pantalla: "sistema" }, "Panel Principal", "#panel");
 
     cargarListaPedidos();
 }
 
-// 2. CARGAR LA LISTA DE PEDIDOS
 function cargarListaPedidos() {
     const contenedor = document.getElementById("contenedorPedidos");
     contenedor.innerHTML = ""; 
@@ -46,7 +50,6 @@ function cargarListaPedidos() {
     });
 }
 
-// 3. SELECCIONAR UNA ORDEN
 function seleccionarOrden(index) {
     indexOrdenActiva = index;
     let orden = ordenesPendientes[index];
@@ -65,11 +68,9 @@ function seleccionarOrden(index) {
     document.getElementById("selectRepeticion").value = "NO";
     document.getElementById("comentariosBioq").value = "";
 
-    // 🔥 LE AVISAMOS AL NAVEGADOR QUE LLEGAMOS AL DETALLE DEL PACIENTE
     history.pushState({ pantalla: "detalle" }, "Detalle Protocolo", `#protocolo-${orden.id}`);
 }
 
-// 4. GENERAR EL PDF LIMPIO PARA EL PACIENTE
 function generarPdfPaciente() {
     if (indexOrdenActiva === null) return;
     let orden = ordenesPendientes[indexOrdenActiva];
@@ -102,7 +103,6 @@ function cerrarPdf() {
     document.getElementById("modalPdf").classList.add("oculto");
 }
 
-// 5. VALIDAR Y ENVIAR AL MÉDICO
 function finalizarYEnviarProtocolo() {
     if (indexOrdenActiva === null) return;
     
@@ -111,18 +111,18 @@ function finalizarYEnviarProtocolo() {
     const comentarios = document.getElementById("comentariosBioq").value;
 
     if (requiereRepeticion === "SI" && comentarios.trim() === "") {
-        alert("Pusiste que se sugiere repetir. Por favor, escribí en los comentarios cuál es la causa técnica para informarle al médico.");
+        alert("Pusiste que se sugiere repetir. Por favor, agregá observaciones técnicas sobre la muestra.");
         return;
     }
 
     let despachoClinico = {
         protocolo: orden.id,
-        bioquimicoFirmante: usuarioAutenticado,
+        profesionalFirmante: usuarioAutenticado,
         resultadosValidados: {
             sodio: document.getElementById("valSodio").value,
             potasio: document.getElementById("valPotasio").value
         },
-        enlaceInteroperableMedico: {
+        enlaceInteroperable: {
             alertaRepeticion: requiereRepeticion,
             observacionesInternas: comentarios
         }
@@ -132,19 +132,17 @@ function finalizarYEnviarProtocolo() {
     console.log(despachoClinico);
     console.log("==========================================================");
 
-    alert(`Protocolo ${orden.id} validado con éxito.\nEl PDF formal se guardó en el portal del paciente y se despachó el metadato interoperable al consultorio.`);
+    alert(`Protocolo ${orden.id} validado con éxito.\nEl documento formal se guardó en el portal del paciente y se despachó el metadato interoperable al sistema central.`);
     
     ordenesPendientes.splice(indexOrdenActiva, 1);
     indexOrdenActiva = null;
     
     cargarListaPedidos();
     
-    // Como terminamos este reingreso, le decimos al navegador que borre ese historial y vuelva al panel
     history.replaceState({ pantalla: "sistema" }, "Panel Principal", "#panel");
     renderizarSegunEstado({ pantalla: "sistema" });
 }
 
-// FUNCIONES DE NAVEGACIÓN MANUAL (LOS BOTONES INTERNOS)
 function volverAListaPendientes() {
     history.pushState({ pantalla: "sistema" }, "Panel Principal", "#panel");
     renderizarSegunEstado({ pantalla: "sistema" });
@@ -155,11 +153,6 @@ function volverAlLogin() {
     renderizarSegunEstado({ pantalla: "login" });
 }
 
-// ========================================================
-// 🚨 LA MAGIA: CONTROLADOR DE LAS FLECHAS DEL NAVEGADOR
-// ========================================================
-
-// Esta función es el "Cerebro Visual" que oculta o muestra pantallas según donde esté parado el historial
 function renderizarSegunEstado(estado) {
     if (!estado || estado.pantalla === "login") {
         indexOrdenActiva = null;
@@ -178,17 +171,13 @@ function renderizarSegunEstado(estado) {
         document.getElementById("mensajeSeleccion").classList.remove("oculto");
     } 
     else if (estado.pantalla === "detalle") {
-        // Si vuelve usando las flechas al detalle, el panel derecho ya se encarga de mostrar la orden activa.
         document.getElementById("mensajeSeleccion").classList.add("oculto");
         document.getElementById("areaTrabajo").classList.remove("oculto");
     }
 }
 
-// Este evento "escucha" cada vez que hacés clic en la flecha de ATRÁS o ADELANTE de tu navegador
 window.onpopstate = function(event) {
-    // Cuando toques las flechas de tu navegador, se ejecuta esto automáticamente:
     renderizarSegunEstado(event.state);
 };
 
-// Registramos el estado inicial (el Login) apenas se carga la página web por primera vez
 history.replaceState({ pantalla: "login" }, "Ingreso", "#login");
