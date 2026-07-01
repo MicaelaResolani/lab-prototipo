@@ -18,7 +18,7 @@
             /* Colores de Identidad Clínica */
             --color-primario: #2563eb;     /* Azul Institucional */
             --color-primario-hover: #1d4ed8;
-            --color-exito: #16a34a;        /* Verde Validación */
+            --color-exito: #16a34a;        /* Verde Validation */
             --color-alerta: #dc2626;       /* Rojo Alerta Técnica / Crítico */
             --color-alerta-bg: #fef2f2;    /* Fondo Alerta Soft */
             --color-alerta-borde: #fca5a5;
@@ -205,4 +205,123 @@
         }
 
         /* Datos del Paciente Seleccionado */
-        .paciente
+        .paciente-header-block {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            background-color: #f8fafc;
+            border: 1px solid var(--borde-suave);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .dato-clinico label {
+            display: block;
+            font-size: 9pt;
+            text-transform: uppercase;
+            color: var(--texto-secundario);
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .dato-clinico span {
+            font-size: 11.5pt;
+            font-weight: 600;
+            color: var(--texto-principal);
+        }
+
+        /* Formulario de Carga de Resultados */
+        .tabla-resultados {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: 10px;
+        }
+
+        .tabla-resultados th {
+            text-align: left;
+            color: var(--texto-secundario);
+            font-size: 9.5pt;
+            font-weight: 600;
+            padding: 0 12px 6px 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabla-resultados td {
+            background-color: #f9fafb;
+            padding: 12px;
+            border-top: 1px solid var(--borde-suave);
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        .tabla-resultados tr td:first-child {
+            border-left: 1px solid var(--borde-suave);
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        .tabla-resultados tr td:last-child {
+            border-right: 1px solid var(--borde-suave);
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .input-resultado {
+            width: 100%;
+            max-width: 140px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 11pt;
+            font-weight: 600;
+            text-align: right;
+            transition: all 0.2s;
+        }
+
+        .input-resultado:focus {
+            outline: none;
+            border-color: var(--color-primario);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background-color: #ffffff;
+        }
+
+        .unidad-medida {
+            font-size: 10pt;
+            color: var(--texto-secundario);
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .rango-referencia {
+            font-size: 9.5pt;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* ==========================================================================
+           CANAL INTEROPERABLE (Doble Vía Médico <-> Bioquímico)
+           ========================================================================== */
+        .bloque-comunicacion {
+            border-radius: var(--radio-borde);
+            padding: 20px;
+            box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde-suave);
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sub-bloque-nota {
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--borde-suave);
+        }
+
+        .nota-medico {
+            background-color: var(--color-medico-bg);
+            border-color: var(--
