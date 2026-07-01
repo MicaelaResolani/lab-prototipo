@@ -3,142 +3,833 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedFlow LIS - Sistema Hospitalario Completo</title>
-    <link rel="stylesheet" href="estilo.css">
+    <title>Terminal Lab_03 - Hospital Provincial de Rosario</title>
+    <style>
+        /* ==========================================================================
+           ESTILOS GLOBALES Y VARIABLES (UI Modernización)
+           ========================================================================== */
+        :root {
+            --bg-principal: #f3f4f6;
+            --bg-tarjeta: #ffffff;
+            --texto-principal: #1f2937;
+            --texto-secundario: #4b5563;
+            --borde-suave: #e5e7eb;
+            
+            /* Colores de Identidad Clínica */
+            --color-primario: #2563eb;     /* Azul Institucional */
+            --color-primario-hover: #1d4ed8;
+            --color-exito: #16a34a;        /* Verde Validación */
+            --color-alerta: #dc2626;       /* Rojo Alerta Técnica / Crítico */
+            --color-alerta-bg: #fef2f2;    /* Fondo Alerta Soft */
+            --color-alerta-borde: #fca5a5;
+            
+            /* Tipografía y Espaciados */
+            --fuente: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+            --radio-borde: 10px;           /* Bordes más redondeados y modernos */
+            --sombra-suave: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --sombra-tarjeta: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--fuente);
+            background-color: var(--bg-principal);
+            color: var(--texto-principal);
+            line-height: 1.5;
+            padding-bottom: 40px;
+        }
+
+        /* ==========================================================================
+           BARRA DE NAVEGACIÓN (Navbar)
+           ========================================================================== */
+        .navbar {
+            background-color: #1e3a8a; /* Azul Marino Hospitalario */
+            color: #ffffff;
+            padding: 14px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--sombra-suave);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-titulo {
+            font-weight: 600;
+            font-size: 15pt;
+            letter-spacing: 0.5px;
+        }
+
+        .navbar-derecha {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 10.5pt;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            transition: all 0.2s;
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: #fca5a5;
+            border: 1px solid rgba(252, 165, 165, 0.4);
+            padding: 6px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 10pt;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(252, 165, 165, 0.1);
+            color: #fca5a5;
+            border-color: #fca5a5;
+        }
+
+        /* ==========================================================================
+           CONTENEDOR PRINCIPAL (Layout de Dos Columnas)
+           ========================================================================== */
+        .app-container {
+            max-width: 1300px;
+            margin: 24px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 24px;
+        }
+
+        /* ==========================================================================
+           PANEL IZQUIERDO: ÓRDENES PENDIENTES (HIS)
+           ========================================================================== */
+        .panel-izquierdo {
+            background-color: var(--bg-tarjeta);
+            border-radius: var(--radio-borde);
+            border: 1px solid var(--borde-suave);
+            box-shadow: var(--sombra-tarjeta);
+            padding: 20px;
+            height: fit-content;
+        }
+
+        .seccion-titulo {
+            font-size: 13pt;
+            color: #1e3a8a;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #eff6ff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .lista-ordenes {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .tarjeta-orden {
+            border: 1px solid var(--borde-suave);
+            border-radius: 8px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background-color: #f9fafb;
+        }
+
+        .tarjeta-orden:hover {
+            border-color: #93c5fd;
+            background-color: #f0f7ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .tarjeta-orden.activa {
+            border-color: var(--color-primario);
+            background-color: #eff6ff;
+            border-left: 4px solid var(--color-primario);
+        }
+
+        .orden-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 9.5pt;
+            color: var(--texto-secundario);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .orden-paciente {
+            font-weight: 600;
+            color: var(--texto-principal);
+            font-size: 11pt;
+            margin-bottom: 4px;
+        }
+
+        .orden-meta {
+            font-size: 9pt;
+            color: var(--texto-secundario);
+        }
+
+        /* ==========================================================================
+           PANEL DERECHO: ÁREA DE TRABAJO (Protocolo Clínico)
+           ========================================================================== */
+        .panel-derecho {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .bloque-blanco {
+            background-color: var(--bg-tarjeta);
+            border-radius: var(--radio-borde);
+            border: 1px solid var(--borde-suave);
+            box-shadow: var(--sombra-tarjeta);
+            padding: 24px;
+        }
+
+        /* Datos del Paciente Seleccionado */
+        .paciente-header-block {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            background-color: #f8fafc;
+            border: 1px solid var(--borde-suave);
+            border-radius: 8px;
+            padding: 16px;
+        }
+
+        .dato-clinico label {
+            display: block;
+            font-size: 9pt;
+            text-transform: uppercase;
+            color: var(--texto-secundario);
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+
+        .dato-clinico span {
+            font-size: 11.5pt;
+            font-weight: 600;
+            color: var(--texto-principal);
+        }
+
+        /* Formulario de Carga de Resultados */
+        .tabla-resultados {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+            margin-top: 10px;
+        }
+
+        .tabla-resultados th {
+            text-align: left;
+            color: var(--texto-secundario);
+            font-size: 9.5pt;
+            font-weight: 600;
+            padding: 0 12px 6px 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tabla-resultados td {
+            background-color: #f9fafb;
+            padding: 12px;
+            border-top: 1px solid var(--borde-suave);
+            border-bottom: 1px solid var(--borde-suave);
+        }
+
+        .tabla-resultados tr td:first-child {
+            border-left: 1px solid var(--borde-suave);
+            border-top-left-radius: 8px;
+            border-bottom-left-radius: 8px;
+            font-weight: 600;
+            color: #1e3a8a;
+        }
+
+        .tabla-resultados tr td:last-child {
+            border-right: 1px solid var(--borde-suave);
+            border-top-right-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        .input-resultado {
+            width: 100%;
+            max-width: 140px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 11pt;
+            font-weight: 600;
+            text-align: right;
+            transition: all 0.2s;
+        }
+
+        .input-resultado:focus {
+            outline: none;
+            border-color: var(--color-primario);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background-color: #ffffff;
+        }
+
+        .unidad-medida {
+            font-size: 10pt;
+            color: var(--texto-secundario);
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .rango-referencia {
+            font-size: 9.5pt;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        /* ==========================================================================
+           BLOQUE ROJO: DESVÍO TÉCNICO INTEROPERABLE (Validación Interna)
+           ========================================================================== */
+        .bloque-desvio-tecnico {
+            background-color: var(--color-alerta-bg);
+            border: 1px solid var(--color-alerta-borde);
+            border-radius: var(--radio-borde);
+            padding: 20px;
+            box-shadow: var(--sombra-suave);
+        }
+
+        .desvio-titulo {
+            color: var(--color-alerta);
+            font-size: 12pt;
+            font-weight: 600;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .desvio-subtitulo {
+            font-size: 9.5pt;
+            color: #991b1b;
+            margin-bottom: 14px;
+            font-weight: 500;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            background-color: rgba(220, 38, 38, 0.04);
+            padding: 10px 14px;
+            border-radius: 6px;
+            border: 1px dashed rgba(220, 38, 38, 0.2);
+            cursor: pointer;
+            font-size: 10.5pt;
+            font-weight: 600;
+            color: #7f1d1d;
+        }
+
+        .checkbox-container input {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+
+        .textarea-observacion {
+            width: 100%;
+            height: 90px;
+            padding: 12px;
+            border: 1px solid var(--color-alerta-borde);
+            border-radius: 6px;
+            font-family: var(--fuente);
+            font-size: 10pt;
+            resize: none;
+            background-color: #ffffff;
+            transition: border-color 0.2s;
+        }
+
+        .textarea-observacion:focus {
+            outline: none;
+            border-color: var(--color-alerta);
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+        }
+
+        /* ==========================================================================
+           BLOQUE GRIS: TRAZABILIDAD (Log de Auditoría)
+           ========================================================================== */
+        .bloque-trazabilidad {
+            background-color: #f8fafc;
+            border: 1px solid var(--borde-suave);
+            border-radius: var(--radio-borde);
+            padding: 20px;
+        }
+
+        .log-linea {
+            font-size: 9.5pt;
+            color: var(--texto-secundario);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .log-linea:last-child {
+            margin-bottom: 0;
+        }
+
+        .log-time {
+            font-family: monospace;
+            background-color: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #334155;
+            font-weight: 500;
+            font-size: 9pt;
+        }
+
+        /* Botonera de Envío */
+        .panel-acciones {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        .btn-despachar {
+            background-color: var(--color-exito);
+            color: #ffffff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 11pt;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-despachar:hover {
+            background-color: #15803d;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 8px -1px rgba(22, 163, 74, 0.3);
+        }
+
+        /* ==========================================================================
+           PANTALLA DE CONTROL DE ACCESO (Login Simulado)
+           ========================================================================== */
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #0f172a;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-card {
+            background-color: var(--bg-tarjeta);
+            border-radius: 12px;
+            padding: 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid #334155;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .login-logo {
+            font-size: 32pt;
+            margin-bottom: 10px;
+        }
+
+        .login-header h2 {
+            font-size: 15pt;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .login-header p {
+            font-size: 10pt;
+            color: var(--texto-secundario);
+            margin-top: 4px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: var(--texto-principal);
+            margin-bottom: 6px;
+        }
+
+        .input-login {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 10.5pt;
+            transition: all 0.2s;
+        }
+
+        .input-login:focus {
+            outline: none;
+            border-color: var(--color-primario);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--color-primario);
+            color: #ffffff;
+            border: none;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 11pt;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-login:hover {
+            background-color: var(--color-primario-hover);
+        }
+
+        .login-machete {
+            margin-top: 20px;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 9pt;
+            color: var(--texto-secundario);
+            border-left: 3px solid #94a3b8;
+        }
+
+        .login-machete ul {
+            margin-left: 18px;
+            margin-top: 4px;
+        }
+    </style>
 </head>
 <body>
 
-    <div id="pantallaLogin" class="contenedor-pantalla">
-        <div class="login-box">
-            <h2>🧪 MedFlow LIS</h2>
-            <p>Sistema de Gestión de Laboratorio - Hospital Provincial</p>
-            <hr>
-            <label>Usuario / Matrícula Profesional:</label>
-            <input type="text" id="inputUsuario" placeholder="Ej: BIOQ-7482">
-            <label>Contraseña:</label>
-            <input type="password" id="inputPassword" placeholder="••••••••">
-            <button class="btn-primario" onclick="ejecutarLogin()">Iniciar Sesión</button>
+    <!-- PANTALLA DE ACCESO (LOGIN) -->
+    <div id="pantallaLogin" class="login-overlay">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">🏥</div>
+                <h2>Terminal Lab_03</h2>
+                <p>Hospital Provincial de Rosario</p>
+            </div>
+            
+            <div class="form-group">
+                <label for="inputEmail">Correo Electrónico del Profesional</label>
+                <input type="email" id="inputEmail" class="input-login" placeholder="ejemplo@hospital.com" value="lab@hospital.com">
+            </div>
+
+            <button class="btn-login" onclick="ejecutarLogin()">Iniciar Sesión en Red</button>
+
+            <div class="login-machete">
+                <strong>Usuarios de prueba válidos:</strong>
+                <ul>
+                    <li><code>lab@hospital.com</code> (Perfil Bioquímico)</li>
+                    <li><code>medico@hospital.com</code> (Perfil Médico de Guardia)</li>
+                </ul>
+            </div>
         </div>
     </div>
 
-    <div id="pantallaSistema" class="contenedor-pantalla oculto">
+    <!-- ESTRUCTURA PRINCIPAL DE LA APLICACIÓN -->
+    <div id="interfazApp" style="display: none;">
         
-     <div class="navbar">
-            <span>Hospital Provincial de Rosario | Terminal Lab_03</span>
+        <!-- NAVBAR SUPERIOR -->
+        <div class="navbar">
+            <span class="navbar-titulo">Hospital Provincial de Rosario | Core LIS</span>
             <div class="navbar-derecha">
                 <span id="nombreProfesional" class="user-badge">👤 </span>
                 <button class="btn-logout" onclick="volverAlLogin()">🚪 Cerrar Sesión</button>
             </div>
         </div>
 
-        <div class="layout-principal">
+        <!-- CONTENEDOR DE TRABAJO -->
+        <div class="app-container">
             
+            <!-- PANEL IZQUIERDO: HIS ÓRDENES PENDIENTES -->
             <div class="panel-izquierdo">
-                <h3>📥 Órdenes Pendientes (HIS)</h3>
-                <p class="subtitulo">Pedidos enviados desde Consultorios / Guardia</p>
-                <div class="lista-pedidos" id="contenedorPedidos">
+                <h2 class="seccion-titulo">📥 Órdenes Pendientes (HIS)</h2>
+                <div id="contenedorOrdenes" class="lista-ordenes">
+                    <!-- Se inyecta dinámicamente mediante JS -->
                 </div>
             </div>
 
+            <!-- PANEL DERECHO: PROTOCOLO ACTIVO -->
             <div class="panel-derecho">
-                <div id="mensajeSeleccion">
-                    <p>👈 Seleccioná una orden de la lista para procesar los resultados.</p>
-                </div>
-
-                <div id="areaTrabajo" class="oculto">
-                    <div class="cabecera-orden">
-                        <h3>📋 Protocolo Nro: <span id="protocoloActivo"></span></h3>
-                        <p><strong>Paciente:</strong> <span id="pacienteActivo"></span> | <strong>Médico:</strong> <span id="medicoActivo"></span></p>
-                        <p><strong>Análisis Solicitado:</strong> <span id="estudioActivo"></span></p>
-                    </div>
-
-                    <div class="tabla-resultados">
-                        <h4>📊 Validación de Valores Clínicos</h4>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Determinación</th>
-                                    <th>Valor Hallado</th>
-                                    <th>Unidades</th>
-                                    <th>Valores de Referencia (Argentina)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Sodio (Na+)</td>
-                                    <td><input type="number" id="valSodio" value="138"></td>
-                                    <td>mEq/L</td>
-                                    <td>135 - 145 mEq/L</td>
-                                </tr>
-                                <tr>
-                                    <td>Potasio (K+)</td>
-                                    <td><input type="number" id="valPotasio" value="6.2"></td>
-                                    <td>mEq/L</td>
-                                    <td>3.5 - 5.0 mEq/L</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="seccion-observaciones">
-                        <h4>✍️ Observaciones Clínicas & Desvío Técnico</h4>
-                        <p class="aclaracion">Este bloque es un canal privado interoperable. No se imprime en el formato del paciente.</p>
-                        
-                        <!-- Texto optimizado para ser coherente con el flujo de validación mutua -->
-                        <label id="labelSugerencia">¿Recomendar/Sugerir revisión de la muestra?</label>
-                        <select id="selectRepeticion">
-                            <option value="NO">No corresponde acción adicional</option>
-                            <option value="SI">SÍ, se sugiere repetir muestra ⚠️</option>
-                        </select>
-
-                        <label id="labelComentarios">Comentarios y Observaciones de Validación:</label>
-                        <textarea id="comentariosBioq" placeholder="Escribí acá las apreciaciones profesionales del caso..."></textarea>
-                    </div>
-
-                    <div class="bloque-botones">
-                        <button class="btn-volver" onclick="volverAListaPendientes()">⬅️ Volver a la Lista</button>
-                        <div class="botones-derecha">
-                            <button class="btn-secundario" onclick="generarPdfPaciente()">🖨️ Previsualizar PDF</button>
-                            <button class="btn-exito" onclick="finalizarYEnviarProtocolo()">🚀 Validar y Despachar</button>
+                
+                <!-- BLOQUE 1: METADATOS CLÍNICOS DEL PACIENTE -->
+                <div class="bloque-blanco">
+                    <h2 class="seccion-titulo">📄 Protocolo Médico Activo</h2>
+                    <div class="paciente-header-block">
+                        <div class="dato-clinico">
+                            <label>ID Protocolo</label>
+                            <span id="txtProtocolo">-</span>
+                        </div>
+                        <div class="dato-clinico">
+                            <label>Paciente</label>
+                            <span id="txtPaciente">-</span>
+                        </div>
+                        <div class="dato-clinico">
+                            <label>Médico Solicitante</label>
+                            <span id="txtMedico">-</span>
                         </div>
                     </div>
                 </div>
-            </div>
 
+                <!-- BLOQUE 2: CARGA DE RESULTADOS ANALÍTICOS -->
+                <div class="bloque-blanco">
+                    <h2 class="seccion-titulo">🧪 Carga de Resultados Analíticos</h2>
+                    <table class="tabla-resultados">
+                        <thead>
+                            <tr>
+                                <th>Determinación</th>
+                                <th>Resultado Actual</th>
+                                <th>Valores de Referencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Sodio Plasmático (Na+)</td>
+                                <td>
+                                    <input type="number" id="valSodio" class="input-resultado" step="0.1">
+                                    <span class="unidad-medida">mEq/L</span>
+                                </td>
+                                <td><span class="rango-referencia">135.0 - 145.0 mEq/L</span></td>
+                            </tr>
+                            <tr>
+                                <td>Potasio Plasmático (K+)</td>
+                                <td>
+                                    <input type="number" id="valPotasio" class="input-resultado" step="0.1">
+                                    <span class="unidad-medida">mEq/L</span>
+                                </td>
+                                <td><span class="rango-referencia">3.5 - 5.0 mEq/L</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- BLOQUE 3: DESVÍO TÉCNICO INTEROPERABLE -->
+                <div id="seccionDesvio" class="bloque-desvio-tecnico">
+                    <div class="desvio-titulo">⚠️ Alerta Técnica / Validación Clínica</div>
+                    <div class="desvio-subtitulo">Canal privado interoperable. No se imprime en el formato del paciente.</div>
+                    
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="checkRepeticion">
+                        Marcar muestra para repetición inmediata (Gatillar re-analizador)
+                    </label>
+
+                    <textarea id="obsTecnica" class="textarea-observacion" placeholder="Escriba las observaciones técnicas sobre la muestra (ej. Muestra hemolizada, confirmación por microgoteo, etc.)..."></textarea>
+                </div>
+
+                <!-- BLOQUE 4: TRAZABILIDAD -->
+                <div class="bloque-blanco">
+                    <h2 class="seccion-titulo">⏱️ Historial de Trazabilidad Electrónica</h2>
+                    <div class="bloque-trazabilidad">
+                        <div class="log-linea">
+                            <span class="log-time" id="timeCreacion">15:30:21</span> 
+                            <span>Orden médica generada e impactada en la base HIS.</span>
+                        </div>
+                        <div class="log-linea">
+                            <span class="log-time" id="timeExtraccion">15:52:10</span> 
+                            <span>Muestra ingresada físicamente a la Terminal Lab_03.</span>
+                        </div>
+                        <div class="log-linea" id="logValidacion" style="display:none;">
+                            <span class="log-time" id="timeValidacion">-</span> 
+                            <span id="txtLogValidacion">Pendiente de validación por profesional en red.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTONERA DE CONTROL -->
+                <div class="panel-acciones">
+                    <button class="btn-despachar" onclick="finalizarYEnviarProtocolo()">🚀 Validar y Despachar Resultados</button>
+                </div>
+
+            </div>
         </div>
     </div>
 
-    <div id="modalPdf" class="modal oculto">
-        <div class="documento-pdf">
-            <div class="pdf-cabecera">
-                <h2>HOSPITAL PROVINCIAL DE ROSARIO</h2>
-                <p>Servicio de Laboratorio Clínico y Bioquímica</p>
-            </div>
-            <hr>
-            <div class="pdf-datos">
-                <p><strong>Paciente:</strong> <span id="pdfPaciente"></span></p>
-                <p><strong>Protocolo:</strong> <span id="pdfProtocolo"></span> | <strong>Fecha:</strong> 19/05/2026</p>
-            </div>
-            <table class="pdf-tabla">
-                <thead>
-                    <tr>
-                        <th>ANÁLISIS</th>
-                        <th>RESULTADO</th>
-                        <th>VALORES DE REFERENCIA</th>
-                    </tr>
-                </thead>
-                <tbody id="pdfCuerpoTabla">
-                </tbody>
-            </table>
-            <div class="pdf-firma">
-                <p>___________________________</p>
-                <p id="pdfFirmaProfesional"></p>
-                <p>Profesional Interviniente</p>
-            </div>
-            <button class="btn-cerrar" onclick="cerrarPdf()">Cerrar Vista de Impresión</button>
-        </div>
-    </div>
+    <!-- ==========================================================================
+       LÓGICA DE CONTROL DEL PROTOCOLO (JavaScript)
+       ========================================================================== -->
+    <script>
+        const baseOrdenes = [
+            {
+                id: "2026-09482",
+                paciente: "Juan Pérez",
+                medico: "Dr. Carlos Mancini (Guardia)",
+                sodio: "138.5",
+                potasio: "4.2",
+                obs: "",
+                repeticion: false
+            },
+            {
+                id: "2026-09483",
+                paciente: "María Laura Gómez",
+                medico: "Dra. Alicia Martínez (Pediatría)",
+                sodio: "142.1",
+                potasio: "6.1",
+                obs: "Confirmar valor por sospecha de hemólisis mecánica en extracción.",
+                repeticion: true
+            }
+        ];
 
-    <script src="logica.js"></script>
+        let usuarioActivo = "";
+        let ordenSeleccionadaId = "2026-09482";
+
+        function ejecutarLogin() {
+            const email = document.getElementById('inputEmail').value.trim().toLowerCase();
+            
+            if (!email) {
+                alert("Por favor ingrese un correo válido de la red hospitalaria.");
+                return;
+            }
+
+            usuarioActivo = email;
+            const badge = document.getElementById('nombreProfesional');
+
+            if (email.includes('medico')) {
+                badge.innerHTML = `👤 Médico: ${email}`;
+                document.getElementById('seccionDesvio').style.display = 'none';
+            } else if (email.includes('lab') || email.includes('bioq')) {
+                badge.innerHTML = `👤 Bioquímico: ${email}`;
+                document.getElementById('seccionDesvio').style.display = 'block';
+            } else {
+                badge.innerHTML = `👤 Usuario: ${email}`;
+                document.getElementById('seccionDesvio').style.display = 'block';
+            }
+
+            document.getElementById('pantallaLogin').style.display = 'none';
+            document.getElementById('interfazApp').style.display = 'block';
+
+            renderizarListaOrdenes();
+            cargarDetalleOrden(ordenSeleccionadaId);
+        }
+
+        function volverAlLogin() {
+            document.getElementById('interfazApp').style.display = 'none';
+            document.getElementById('pantallaLogin').style.display = 'flex';
+        }
+
+        function renderizarListaOrdenes() {
+            const contenedor = document.getElementById('contenedorOrdenes');
+            contenedor.innerHTML = "";
+
+            baseOrdenes.forEach(orden => {
+                const tarjeta = document.createElement('div');
+                tarjeta.className = `tarjeta-orden ${orden.id === ordenSeleccionadaId ? 'activa' : ''}`;
+                tarjeta.onclick = () => {
+                    guardarProgresoActual();
+                    ordenSeleccionadaId = orden.id;
+                    renderizarListaOrdenes();
+                    cargarDetalleOrden(orden.id);
+                };
+
+                tarjeta.innerHTML = `
+                    <div class="orden-header">
+                        <span>ID: ${orden.id}</span>
+                        <span>⚠️ HIS</span>
+                    </div>
+                    <div class="orden-paciente">${orden.paciente}</div>
+                    <div class="orden-meta">Req: Na+ / K+ Plasmático</div>
+                `;
+                contenedor.appendChild(tarjeta);
+            });
+        }
+
+        function guardarProgresoActual() {
+            const index = baseOrdenes.findIndex(o => o.id === ordenSeleccionadaId);
+            if (index !== -1) {
+                baseOrdenes[index].sodio = document.getElementById('valSodio').value;
+                baseOrdenes[index].potasio = document.getElementById('valPotasio').value;
+                baseOrdenes[index].obs = document.getElementById('obsTecnica').value;
+                baseOrdenes[index].repeticion = document.getElementById('checkRepeticion').checked;
+            }
+        }
+
+        function cargarDetalleOrden(id) {
+            const orden = baseOrdenes.find(o => o.id === id);
+            if (!orden) return;
+
+            document.getElementById('txtProtocolo').innerText = orden.id;
+            document.getElementById('txtPaciente').innerText = orden.paciente;
+            document.getElementById('txtMedico').innerText = orden.medico;
+
+            document.getElementById('valSodio').value = orden.sodio;
+            document.getElementById('valPotasio').value = orden.potasio;
+            document.getElementById('obsTecnica').value = orden.obs;
+            document.getElementById('checkRepeticion').checked = orden.repeticion;
+
+            document.getElementById('logValidacion').style.display = 'none';
+        }
+
+        function finalizarYEnviarProtocolo() {
+            guardarProgresoActual();
+            const orden = baseOrdenes.find(o => o.id === ordenSeleccionadaId);
+
+            const payloadInteroperable = {
+                metadata_sistema: "Terminal Lab_03 Core LIS",
+                usuario_validador: usuarioActivo,
+                protocolo_id: orden.id,
+                paciente_nombre: orden.paciente,
+                timestamp_despacho: new Date().toISOString(),
+                valores_laboratorio: {
+                    sodio: parseFloat(orden.sodio),
+                    potasio: parseFloat(orden.potasio)
+                },
+                desvio_clinico: {
+                    solicita_repeticion: orden.repeticion,
+                    observacion_interna_mirth: orden.obs
+                }
+            };
+
+            console.log("DESPACHANDO JSON ESTADO FHIR/MIRTH CONNECT:", payloadInteroperable);
+
+            const ahora = new Date();
+            const horaStr = ahora.toTimeString().split(' ')[0];
+            
+            document.getElementById('timeValidacion').innerText = horaStr;
+            document.getElementById('txtLogValidacion').innerText = `Resultados validados por ${usuarioActivo}. Enviando paquete de datos estructurados al HIS...`;
+            document.getElementById('logValidacion').style.display = 'flex';
+
+            alert(`¡Éxito Clínico! Protocolo ${orden.id} procesado con éxito.\nDatos estructurados despachados en red mediante JSON.`);
+        }
+    </script>
 </body>
 </html>
