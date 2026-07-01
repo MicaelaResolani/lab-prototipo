@@ -26,7 +26,8 @@
         <div class="navbar">
             <span>Hospital Provincial de Rosario | Terminal Lab_03</span>
             <div class="navbar-derecha">
-                <span id="nombreProfesional" class="user-badge">👤 Bioquímico: </span>
+                <!-- Se quitó el texto fijo para que JS inyecte el Rol + Email correspondiente -->
+                <span id="nombreProfesional" class="user-badge">👤 </span>
                 <button class="btn-logout" onclick="volverAlLogin()">🚪 Cerrar Sesión</button>
             </div>
         </div>
@@ -37,7 +38,7 @@
                 <h3>📥 Órdenes Pendientes (HIS)</h3>
                 <p class="subtitulo">Pedidos enviados desde Consultorios / Guardia</p>
                 <div class="lista-pedidos" id="contenedorPedidos">
-                    </div>
+                </div>
             </div>
 
             <div class="panel-derecho">
@@ -84,14 +85,15 @@
                         <h4>✍️ Observaciones Clínicas & Desvío Técnico</h4>
                         <p class="aclaracion">Este bloque es un canal privado interoperable. No se imprime en el formato del paciente.</p>
                         
-                        <label>¿Sugerir repetición de análisis al médico?</label>
+                        <!-- Texto optimizado para ser coherente con el flujo de validación mutua -->
+                        <label id="labelSugerencia">¿Recomendar/Sugerir revisión de la muestra?</label>
                         <select id="selectRepeticion">
-                            <option value="NO">No corresponde repetición</option>
+                            <option value="NO">No corresponde acción adicional</option>
                             <option value="SI">SÍ, se sugiere repetir muestra ⚠️</option>
                         </select>
 
-                        <label>Comentarios del Bioquímico (Indicar causas/motivos si corresponde repetir):</label>
-                        <textarea id="comentariosBioq" placeholder="Escribí acá tus apreciaciones profesionales para el médico..."></textarea>
+                        <label id="labelComentarios">Comentarios y Observaciones de Validación:</label>
+                        <textarea id="comentariosBioq" placeholder="Escribí acá las apreciaciones profesionales del caso..."></textarea>
                     </div>
 
                     <div class="bloque-botones">
@@ -127,12 +129,12 @@
                     </tr>
                 </thead>
                 <tbody id="pdfCuerpoTabla">
-                    </tbody>
+                </tbody>
             </table>
             <div class="pdf-firma">
                 <p>___________________________</p>
                 <p id="pdfFirmaProfesional"></p>
-                <p>Bioquímico Especialista</p>
+                <p>Profesional Interviniente</p>
             </div>
             <button class="btn-cerrar" onclick="cerrarPdf()">Cerrar Vista de Impresión</button>
         </div>
