@@ -541,7 +541,6 @@
 </head>
 <body>
 
-    <!-- PANTALLA DE ACCESO (LOGIN) -->
     <div id="pantallaLogin" class="login-overlay">
         <div class="login-card">
             <div class="login-header">
@@ -567,10 +566,8 @@
         </div>
     </div>
 
-    <!-- ESTRUCTURA PRINCIPAL DE LA APLICACIÓN -->
     <div id="interfazApp" style="display: none;">
         
-        <!-- NAVBAR SUPERIOR -->
         <div class="navbar">
             <span class="navbar-titulo">Hospital Provincial de Rosario | Core LIS</span>
             <div class="navbar-derecha">
@@ -579,21 +576,16 @@
             </div>
         </div>
 
-        <!-- CONTENEDOR DE TRABAJO -->
         <div class="app-container">
             
-            <!-- PANEL IZQUIERDO: HIS ÓRDENES PENDIENTES -->
             <div class="panel-izquierdo">
                 <h2 class="seccion-titulo">📥 Órdenes Pendientes (HIS)</h2>
                 <div id="contenedorOrdenes" class="lista-ordenes">
-                    <!-- Se inyecta dinámicamente mediante JS -->
-                </div>
+                    </div>
             </div>
 
-            <!-- PANEL DERECHO: PROTOCOLO ACTIVO -->
             <div class="panel-derecho">
                 
-                <!-- BLOQUE 1: METADATOS CLÍNICOS DEL PACIENTE -->
                 <div class="bloque-blanco">
                     <h2 class="seccion-titulo">📄 Protocolo Médico Activo</h2>
                     <div class="paciente-header-block">
@@ -612,7 +604,6 @@
                     </div>
                 </div>
 
-                <!-- BLOQUE 2: CARGA DE RESULTADOS ANALÍTICOS -->
                 <div class="bloque-blanco">
                     <h2 class="seccion-titulo">🧪 Carga de Resultados Analíticos</h2>
                     <table class="tabla-resultados">
@@ -644,20 +635,18 @@
                     </table>
                 </div>
 
-                <!-- BLOQUE 3: DESVÍO TÉCNICO INTEROPERABLE -->
                 <div id="seccionDesvio" class="bloque-desvio-tecnico">
                     <div class="desvio-titulo">⚠️ Alerta Técnica / Validación Clínica</div>
                     <div class="desvio-subtitulo">Canal privado interoperable. No se imprime en el formato del paciente.</div>
                     
                     <label class="checkbox-container">
                         <input type="checkbox" id="checkRepeticion">
-                        Marcar muestra para repetición inmediata (Gatillar re-analizador)
+                        Marcar muestra para repetición inmediata
                     </label>
 
                     <textarea id="obsTecnica" class="textarea-observacion" placeholder="Escriba las observaciones técnicas sobre la muestra (ej. Muestra hemolizada, confirmación por microgoteo, etc.)..."></textarea>
                 </div>
 
-                <!-- BLOQUE 4: TRAZABILIDAD -->
                 <div class="bloque-blanco">
                     <h2 class="seccion-titulo">⏱️ Historial de Trazabilidad Electrónica</h2>
                     <div class="bloque-trazabilidad">
@@ -676,7 +665,6 @@
                     </div>
                 </div>
 
-                <!-- BOTONERA DE CONTROL -->
                 <div class="panel-acciones">
                     <button class="btn-despachar" onclick="finalizarYEnviarProtocolo()">🚀 Validar y Despachar Resultados</button>
                 </div>
@@ -685,9 +673,6 @@
         </div>
     </div>
 
-    <!-- ==========================================================================
-       LÓGICA DE CONTROL DEL PROTOCOLO (JavaScript)
-       ========================================================================== -->
     <script>
         const baseOrdenes = [
             {
