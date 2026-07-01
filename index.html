@@ -22,6 +22,8 @@
             --color-alerta: #dc2626;       /* Rojo Alerta Técnica / Crítico */
             --color-alerta-bg: #fef2f2;    /* Fondo Alerta Soft */
             --color-alerta-borde: #fca5a5;
+            --color-medico-bg: #f0fdf4;    /* Fondo Soft para notas médicas */
+            --color-medico-borde: #bbf7d0;
             
             /* Tipografía y Espaciados */
             --fuente: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
@@ -301,19 +303,37 @@
         }
 
         /* ==========================================================================
-           BLOQUE ROJO: DESVÍO TÉCNICO INTEROPERABLE (Validación Interna)
+           CANAL INTEROPERABLE (Doble Vía Médico <-> Bioquímico)
            ========================================================================== */
-        .bloque-desvio-tecnico {
-            background-color: var(--color-alerta-bg);
-            border: 1px solid var(--color-alerta-borde);
+        .bloque-comunicacion {
             border-radius: var(--radio-borde);
             padding: 20px;
             box-shadow: var(--sombra-suave);
+            border: 1px solid var(--borde-suave);
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        .desvio-titulo {
-            color: var(--color-alerta);
-            font-size: 12pt;
+        .sub-bloque-nota {
+            padding: 14px;
+            border-radius: 8px;
+            border: 1px solid var(--borde-suave);
+        }
+
+        .nota-medico {
+            background-color: var(--color-medico-bg);
+            border-color: var(--color-medico-borde);
+        }
+
+        .nota-bioquimico {
+            background-color: var(--color-alerta-bg);
+            border-color: var(--color-alerta-borde);
+        }
+
+        .comunicacion-titulo {
+            font-size: 11pt;
             font-weight: 600;
             margin-bottom: 6px;
             display: flex;
@@ -321,24 +341,20 @@
             gap: 8px;
         }
 
-        .desvio-subtitulo {
-            font-size: 9.5pt;
-            color: #991b1b;
-            margin-bottom: 14px;
-            font-weight: 500;
-        }
+        .comunicacion-titulo.medico { color: #166534; }
+        .comunicacion-titulo.bioquimico { color: #991b1b; }
 
         .checkbox-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             background-color: rgba(220, 38, 38, 0.04);
-            padding: 10px 14px;
+            padding: 8px 12px;
             border-radius: 6px;
             border: 1px dashed rgba(220, 38, 38, 0.2);
             cursor: pointer;
-            font-size: 10.5pt;
+            font-size: 10pt;
             font-weight: 600;
             color: #7f1d1d;
         }
@@ -349,11 +365,11 @@
             cursor: pointer;
         }
 
-        .textarea-observacion {
+        .textarea-comunicacion {
             width: 100%;
-            height: 90px;
-            padding: 12px;
-            border: 1px solid var(--color-alerta-borde);
+            height: 80px;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
             border-radius: 6px;
             font-family: var(--fuente);
             font-size: 10pt;
@@ -362,10 +378,9 @@
             transition: border-color 0.2s;
         }
 
-        .textarea-observacion:focus {
+        .textarea-comunicacion:focus {
             outline: none;
-            border-color: var(--color-alerta);
-            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+            border-color: var(--color-primario);
         }
 
         /* ==========================================================================
@@ -635,16 +650,22 @@
                     </table>
                 </div>
 
-                <div id="seccionDesvio" class="bloque-desvio-tecnico">
-                    <div class="desvio-titulo">⚠️ Alerta Técnica / Validación Clínica</div>
-                    <div class="desvio-subtitulo">Canal privado interoperable. No se imprime en el formato del paciente.</div>
+                <div class="bloque-comunicacion">
+                    <h2 class="seccion-titulo" style="margin-bottom:0; padding-bottom:0; border:none;">💬 Canal Interoperable de Comunicación</h2>
                     
-                    <label class="checkbox-container">
-                        <input type="checkbox" id="checkRepeticion">
-                        Marcar muestra para repetición inmediata
-                    </label>
+                    <div id="subBloqueMedico" class="sub-bloque-nota nota-medico">
+                        <div class="comunicacion-titulo medico">🩺 Indicaciones / Sospechas del Médico Solicitante</div>
+                        <textarea id="obsMedico" class="textarea-comunicacion" placeholder="Escriba aquí los datos clínicos del paciente relevantes para el laboratorio (ej. sospecha diagnóstica, tipo de vía de extracción)..."></textarea>
+                    </div>
 
-                    <textarea id="obsTecnica" class="textarea-observacion" placeholder="Escriba las observaciones técnicas sobre la muestra (ej. Muestra hemolizada, confirmación por microgoteo, etc.)..."></textarea>
+                    <div id="subBloqueBioq" class="sub-bloque-nota nota-bioquimico">
+                        <div class="comunicacion-titulo bioquimico">🔬 Alerta Técnica / Observación del Laboratorio</div>
+                        <label class="checkbox-container" id="contenedorCheckRepeticion">
+                            <input type="checkbox" id="checkRepeticion">
+                            Marcar muestra para repetición inmediata
+                        </label>
+                        <textarea id="obsTecnica" class="textarea-comunicacion" placeholder="Escriba las observaciones técnicas sobre la muestra (ej. Muestra hemolizada, confirmación analítica)..."></textarea>
+                    </div>
                 </div>
 
                 <div class="bloque-blanco">
@@ -681,7 +702,8 @@
                 medico: "Dr. Carlos Mancini (Guardia)",
                 sodio: "138.5",
                 potasio: "4.2",
-                obs: "",
+                obsMedico: "Paciente estable. Control de rutina post-hidratación.",
+                obsTecnica: "",
                 repeticion: false
             },
             {
@@ -690,7 +712,8 @@
                 medico: "Dra. Alicia Martínez (Pediatría)",
                 sodio: "142.1",
                 potasio: "6.1",
-                obs: "Confirmar valor por sospecha de hemólisis mecánica en extracción.",
+                obsMedico: "Extracción dificultosa por microgoteo. Monitorear potasio crítico.",
+                obsTecnica: "Confirmar valor por sospecha de hemólisis mecánica en extracción.",
                 repeticion: true
             }
         ];
@@ -709,15 +732,28 @@
             usuarioActivo = email;
             const badge = document.getElementById('nombreProfesional');
 
+            // Adaptación de los permisos en la interfaz según el perfil
             if (email.includes('medico')) {
                 badge.innerHTML = `👤 Médico: ${email}`;
-                document.getElementById('seccionDesvio').style.display = 'none';
+                
+                // El médico escribe su parte, la del bioquímico la ve bloqueada de solo lectura
+                document.getElementById('obsMedico').readOnly = false;
+                document.getElementById('obsTecnica').readOnly = true;
+                document.getElementById('checkRepeticion').disabled = true;
+                document.getElementById('obsTecnica').placeholder = "Sin comentarios del laboratorio hasta el momento.";
             } else if (email.includes('lab') || email.includes('bioq')) {
                 badge.innerHTML = `👤 Bioquímico: ${email}`;
-                document.getElementById('seccionDesvio').style.display = 'block';
+                
+                // El bioquímico edita lo técnico y lee lo que dejó el médico
+                document.getElementById('obsMedico').readOnly = true;
+                document.getElementById('obsTecnica').readOnly = false;
+                document.getElementById('checkRepeticion').disabled = false;
+                document.getElementById('obsMedico').placeholder = "El médico no ingresó notas aclaratorias para esta orden.";
             } else {
                 badge.innerHTML = `👤 Usuario: ${email}`;
-                document.getElementById('seccionDesvio').style.display = 'block';
+                document.getElementById('obsMedico').readOnly = false;
+                document.getElementById('obsTecnica').readOnly = false;
+                document.getElementById('checkRepeticion').disabled = false;
             }
 
             document.getElementById('pantallaLogin').style.display = 'none';
@@ -760,61 +796,4 @@
 
         function guardarProgresoActual() {
             const index = baseOrdenes.findIndex(o => o.id === ordenSeleccionadaId);
-            if (index !== -1) {
-                baseOrdenes[index].sodio = document.getElementById('valSodio').value;
-                baseOrdenes[index].potasio = document.getElementById('valPotasio').value;
-                baseOrdenes[index].obs = document.getElementById('obsTecnica').value;
-                baseOrdenes[index].repeticion = document.getElementById('checkRepeticion').checked;
-            }
-        }
-
-        function cargarDetalleOrden(id) {
-            const orden = baseOrdenes.find(o => o.id === id);
-            if (!orden) return;
-
-            document.getElementById('txtProtocolo').innerText = orden.id;
-            document.getElementById('txtPaciente').innerText = orden.paciente;
-            document.getElementById('txtMedico').innerText = orden.medico;
-
-            document.getElementById('valSodio').value = orden.sodio;
-            document.getElementById('valPotasio').value = orden.potasio;
-            document.getElementById('obsTecnica').value = orden.obs;
-            document.getElementById('checkRepeticion').checked = orden.repeticion;
-
-            document.getElementById('logValidacion').style.display = 'none';
-        }
-
-        function finalizarYEnviarProtocolo() {
-            guardarProgresoActual();
-            const orden = baseOrdenes.find(o => o.id === ordenSeleccionadaId);
-
-            const payloadInteroperable = {
-                metadata_sistema: "Terminal Lab_03 Core LIS",
-                usuario_validador: usuarioActivo,
-                protocolo_id: orden.id,
-                paciente_nombre: orden.paciente,
-                timestamp_despacho: new Date().toISOString(),
-                valores_laboratorio: {
-                    sodio: parseFloat(orden.sodio),
-                    potasio: parseFloat(orden.potasio)
-                },
-                desvio_clinico: {
-                    solicita_repeticion: orden.repeticion,
-                    observacion_interna_mirth: orden.obs
-                }
-            };
-
-            console.log("DESPACHANDO JSON ESTADO FHIR/MIRTH CONNECT:", payloadInteroperable);
-
-            const ahora = new Date();
-            const horaStr = ahora.toTimeString().split(' ')[0];
-            
-            document.getElementById('timeValidacion').innerText = horaStr;
-            document.getElementById('txtLogValidacion').innerText = `Resultados validados por ${usuarioActivo}. Enviando paquete de datos estructurados al HIS...`;
-            document.getElementById('logValidacion').style.display = 'flex';
-
-            alert(`¡Éxito Clínico! Protocolo ${orden.id} procesado con éxito.\nDatos estructurados despachados en red mediante JSON.`);
-        }
-    </script>
-</body>
-</html>
+            if (index !== -
