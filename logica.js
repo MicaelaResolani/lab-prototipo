@@ -1,183 +1,74 @@
-let ordenesPendientes = [
-    { id: "2026-09482", paciente: "Juan Pérez", medico: "Dr. Gastón Rodríguez", estudio: "Ionograma Plasmático", sodio: 138, potasio: 6.2 },
-    { id: "2026-09483", paciente: "Marta Gómez", medico: "Dra. Ana Milone", estudio: "Ionograma Plasmático", sodio: 142, potasio: 4.1 },
-    { id: "2026-09484", paciente: "Carlos Rossi", medico: "Dr. Gastón Rodríguez", estudio: "Ionograma Plasmático", sodio: 130, potasio: 3.6 }
+// Estilos inyectados por JS (sin archivo CSS aparte)
+const estilos = document.createElement('style');
+estilos.textContent = `
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: sans-serif; background: #0a0e14; color: #f0f6fc; padding: 20px; }
+    .app-shell { max-width: 900px; margin: 0 auto; }
+    h1 { color: #2f81f7; margin-bottom: 2rem; }
+    .card { background: #141923; border-radius: 16px; border: 1px solid #30363d; padding: 2rem; margin-bottom: 2rem; }
+    .card h3 { margin-bottom: 1.5rem; color: #2f81f7; }
+    #form-muestra { display: flex; flex-direction: column; gap: 1rem; }
+    input, select { padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid #30363d; color: #fff; border-radius: 8px; }
+    .btn-primary { padding: 15px; background: #238636; color: white; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; }
+    .btn-primary:hover { background: #2ea043; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 12px; border-bottom: 1px solid #30363d; }
+    th { color: #8b949e; font-size: 0.85rem; text-transform: uppercase; }
+    .status-badge { background: rgba(47,129,247,0.15); color: #2f81f7; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; }
+`;
+document.head.appendChild(estilos);
+
+// ---- Lógica original (sin cambios) ----
+
+// Simulación del estado global de las muestras del laboratorio
+let registroMuestras = [
+    { id: "LAB-1092", paciente: "Carlos Gómez", estudio: "Hemograma", estado: "En Proceso" },
+    { id: "LAB-1093", paciente: "María Rodríguez", estudio: "Urocultivo", estado: "En Proceso" }
 ];
+const formMuestra = document.getElementById('form-muestra');
+const listaMuestras = document.getElementById('lista-muestras');
 
-let usuarioAutenticado = "";
-let indexOrdenActiva = null;
+// Función para actualizar y dibujar la tabla en pantalla
+function renderizarMuestras() {
+    listaMuestras.innerHTML = "";
 
-function ejecutarLogin() {
-    const usuario = document.getElementById("inputUsuario").value;
-    if (usuario.trim() === "") {
-        alert("Por favor, ingresá tu usuario o número de matrícula.");
-        return;
-    }
-    usuarioAutenticado = usuario.trim();
-    
-    // Identificamos dinámicamente el rol del usuario para corregir el error del badge
-    let rolDetectado = "Profesional";
-    if (usuarioAutenticado.includes("medico")) {
-        rolDetectado = "Médico";
-    } else if (usuarioAutenticado.includes("lab") || usuarioAutenticado.includes("bioq")) {
-        rolDetectado = "Bioquímico";
-    }
-    
-    document.getElementById("nombreProfesional").innerText = `👤 ${rolDetectado}: ${usuarioAutenticado}`;
-    
-    document.getElementById("pantallaLogin").classList.add("oculto");
-    document.getElementById("pantallaSistema").classList.remove("oculto");
-    
-    history.pushState({ pantalla: "sistema" }, "Panel Principal", "#panel");
-
-    cargarListaPedidos();
-}
-
-function cargarListaPedidos() {
-    const contenedor = document.getElementById("contenedorPedidos");
-    contenedor.innerHTML = ""; 
-    
-    ordenesPendientes.forEach((orden, index) => {
-        let tarjeta = document.createElement("div");
-        tarjeta.className = "tarjeta-pedido-link";
-        tarjeta.innerHTML = `
-            <p><strong>Nro: ${orden.id}</strong></p>
-            <p>Pac: ${orden.paciente}</p>
-            <small>Origen: ${orden.medico}</small>
+    registroMuestras.forEach(muestra => {
+        const fila = document.createElement('tr');
+        fila.innerHTML = `
+            <td><strong>${muestra.id}</strong></td>
+            <td>${muestra.paciente}</td>
+            <td>${muestra.estudio}</td>
+            <td><span class="status-badge">${muestra.estado}</span></td>
         `;
-        tarjeta.onclick = () => seleccionarOrden(index);
-        contenedor.appendChild(tarjeta);
+        listaMuestras.appendChild(fila);
     });
 }
 
-function seleccionarOrden(index) {
-    indexOrdenActiva = index;
-    let orden = ordenesPendientes[index];
-    
-    document.getElementById("mensajeSeleccion").classList.add("oculto");
-    document.getElementById("areaTrabajo").classList.remove("oculto");
-    
-    document.getElementById("protocoloActivo").innerText = orden.id;
-    document.getElementById("pacienteActivo").innerText = orden.paciente;
-    document.getElementById("medicoActivo").innerText = orden.medico;
-    document.getElementById("estudioActivo").innerText = orden.estudio;
-    
-    document.getElementById("valSodio").value = orden.sodio;
-    document.getElementById("valPotasio").value = orden.potasio;
-    
-    document.getElementById("selectRepeticion").value = "NO";
-    document.getElementById("comentariosBioq").value = "";
+// Escucha del evento submit para agregar una nueva muestra
+formMuestra.addEventListener('submit', function(e) {
+    e.preventDefault();
 
-    history.pushState({ pantalla: "detalle" }, "Detalle Protocolo", `#protocolo-${orden.id}`);
-}
+    const pacienteNombre = document.getElementById('paciente').value;
+    const tipoEstudio = document.getElementById('tipo-analisis').value;
 
-function generarPdfPaciente() {
-    if (indexOrdenActiva === null) return;
-    let orden = ordenesPendientes[indexOrdenActiva];
-    
-    const sodioHallado = document.getElementById("valSodio").value;
-    const potasioHallado = document.getElementById("valPotasio").value;
+    // Generar un código identificador único aleatorio para la muestra
+    const nuevoId = `LAB-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    document.getElementById("pdfPaciente").innerText = orden.paciente;
-    document.getElementById("pdfProtocolo").innerText = orden.id;
-    document.getElementById("pdfFirmaProfesional").innerText = `Mat. Profesional Nro: ${usuarioAutenticado}`;
-    
-    const cuerpoTabla = document.getElementById("pdfCuerpoTabla");
-    cuerpoTabla.innerHTML = `
-        <tr>
-            <td>Sodio Plasmático (Na+)</td>
-            <td><strong>${sodioHallado} mEq/L</strong></td>
-            <td>135 - 145 mEq/L</td>
-        </tr>
-        <tr>
-            <td>Potasio Plasmático (K+)</td>
-            <td><strong>${potasioHallado} mEq/L</strong></td>
-            <td>3.5 - 5.0 mEq/L</td>
-        </tr>
-    `;
-    
-    document.getElementById("modalPdf").classList.remove("oculto");
-}
-
-function cerrarPdf() {
-    document.getElementById("modalPdf").classList.add("oculto");
-}
-
-function finalizarYEnviarProtocolo() {
-    if (indexOrdenActiva === null) return;
-    
-    const orden = ordenesPendientes[indexOrdenActiva];
-    const requiereRepeticion = document.getElementById("selectRepeticion").value;
-    const comentarios = document.getElementById("comentariosBioq").value;
-
-    if (requiereRepeticion === "SI" && comentarios.trim() === "") {
-        alert("Pusiste que se sugiere repetir. Por favor, agregá observaciones técnicas sobre la muestra.");
-        return;
-    }
-
-    let despachoClinico = {
-        protocolo: orden.id,
-        profesionalFirmante: usuarioAutenticado,
-        resultadosValidados: {
-            sodio: document.getElementById("valSodio").value,
-            potasio: document.getElementById("valPotasio").value
-        },
-        enlaceInteroperable: {
-            alertaRepeticion: requiereRepeticion,
-            observacionesInternas: comentarios
-        }
+    const nuevaMuestra = {
+        id: nuevoId,
+        paciente: pacienteNombre,
+        estudio: tipoEstudio,
+        estado: "En Proceso"
     };
 
-    console.log("=== DESPACHANDO PROTOCOLO VALIDADO A LA HISTORIA CLÍNICA ===");
-    console.log(despachoClinico);
-    console.log("==========================================================");
+    registroMuestras.push(nuevaMuestra);
+    renderizarMuestras();
 
-    alert(`Protocolo ${orden.id} validado con éxito.\nEl documento formal se guardó en el portal del paciente y se despachó el metadato interoperable al sistema central.`);
-    
-    ordenesPendientes.splice(indexOrdenActiva, 1);
-    indexOrdenActiva = null;
-    
-    cargarListaPedidos();
-    
-    history.replaceState({ pantalla: "sistema" }, "Panel Principal", "#panel");
-    renderizarSegunEstado({ pantalla: "sistema" });
-}
+    // Resetear los campos del formulario
+    formMuestra.reset();
+});
 
-function volverAListaPendientes() {
-    history.pushState({ pantalla: "sistema" }, "Panel Principal", "#panel");
-    renderizarSegunEstado({ pantalla: "sistema" });
-}
-
-function volverAlLogin() {
-    history.pushState({ pantalla: "login" }, "Ingreso", "#login");
-    renderizarSegunEstado({ pantalla: "login" });
-}
-
-function renderizarSegunEstado(estado) {
-    if (!estado || estado.pantalla === "login") {
-        indexOrdenActiva = null;
-        usuarioAutenticado = "";
-        document.getElementById("inputUsuario").value = "";
-        document.getElementById("inputPassword").value = "";
-        
-        document.getElementById("pantallaSistema").classList.add("oculto");
-        document.getElementById("pantallaLogin").classList.remove("oculto");
-    } 
-    else if (estado.pantalla === "sistema") {
-        indexOrdenActiva = null;
-        document.getElementById("pantallaLogin").classList.add("oculto");
-        document.getElementById("pantallaSistema").classList.remove("oculto");
-        document.getElementById("areaTrabajo").classList.add("oculto");
-        document.getElementById("mensajeSeleccion").classList.remove("oculto");
-    } 
-    else if (estado.pantalla === "detalle") {
-        document.getElementById("mensajeSeleccion").classList.add("oculto");
-        document.getElementById("areaTrabajo").classList.remove("oculto");
-    }
-}
-
-window.onpopstate = function(event) {
-    renderizarSegunEstado(event.state);
-};
-
-history.replaceState({ pantalla: "login" }, "Ingreso", "#login");
+// Carga inicial al iniciar la pantalla
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarMuestras();
+});
