@@ -2,30 +2,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Terminal Lab</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terminal Lab | Sistema de Laboratorio</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; background: #f3f4f6; padding: 20px; margin: 0; }
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .login-card { background: white; padding: 40px; border-radius: 10px; width: 300px; text-align: center; }
-        .login-card input { width: 100%; margin-bottom: 10px; padding: 8px; box-sizing: border-box; }
-        .btn-login { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 6px; }
+        :root {
+            --bg: #0a0e14;
+            --card-bg: #141923;
+            --text-primary: #f0f6fc;
+            --text-secondary: #8b949e;
+            --border: #30363d;
+            --primary: #238636;
+            --primary-hover: #2ea043;
+            --accent: #2f81f7;
+            --urgente: #f85149;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; }
 
-        .app-shell { max-width: 900px; margin: 0 auto; }
-        .card { background: white; border-radius: 10px; border: 1px solid #e5e7eb; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card h3 { margin-bottom: 1.5rem; color: #2563eb; }
-        #form-muestra { display: flex; flex-direction: column; gap: 1rem; max-width: 400px; }
-        #form-muestra input, #form-muestra select { padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; }
-        .btn-primary { padding: 12px; background: #16a34a; color: white; border: none; border-radius: 6px; font-weight: 700; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #e5e7eb; }
-        th { color: #6b7280; font-size: 0.85rem; text-transform: uppercase; }
-        .status-badge { background: #dbeafe; color: #2563eb; padding: 4px 10px; border-radius: 12px; font-size: 0.85rem; }
+        .login-overlay { position: fixed; inset: 0; background: rgba(10,14,20,0.95); display: flex; justify-content: center; align-items: center; z-index: 999; }
+        .login-card { background: var(--card-bg); border: 1px solid var(--border); padding: 40px; border-radius: 14px; width: 320px; text-align: center; }
+        .login-card h2 { color: var(--accent); margin-bottom: 1.5rem; }
+        .login-card input { width: 100%; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff; border-radius: 8px; }
+        .btn-login { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; cursor: pointer; border-radius: 8px; font-weight: 700; }
+        .btn-login:hover { background: var(--primary-hover); }
+
+        .app-shell { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .top-bar h1 { color: var(--accent); font-size: 1.6rem; }
+        .rol-selector { display: flex; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--text-secondary); }
+        .rol-selector select { background: var(--card-bg); border: 1px solid var(--border); color: #fff; border-radius: 6px; padding: 6px 10px; }
+
+        .card { background: var(--card-bg); border-radius: 14px; border: 1px solid var(--border); padding: 1.75rem; margin-bottom: 1.5rem; }
+        .card h3 { margin-bottom: 1.25rem; color: var(--accent); font-size: 1.05rem; }
+
+        #form-muestra { display: flex; gap: 12px; flex-wrap: wrap; }
+        #form-muestra input, #form-muestra select { flex: 1; min-width: 180px; padding: 10px 12px; background: rgba(0,0,0,0.25); border: 1px solid var(--border); color: #fff; border-radius: 8px; }
+        .btn-primary { padding: 10px 20px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .muestra { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; border-left: 4px solid var(--accent); }
+        .muestra.a-repetir { border-left-color: var(--urgente); }
+        .muestra-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .muestra-header strong { font-size: 1.05rem; }
+        .muestra-id { color: var(--text-secondary); font-size: 0.8rem; }
+        .badge { font-size: 0.75rem; padding: 3px 10px; border-radius: 12px; background: rgba(47,129,247,0.15); color: var(--accent); }
+        .badge.repetir { background: rgba(248,81,73,0.15); color: var(--urgente); }
+
+        .notas-lista { margin: 0.75rem 0; display: flex; flex-direction: column; gap: 6px; }
+        .nota { background: rgba(0,0,0,0.2); border-radius: 8px; padding: 8px 12px; font-size: 0.88rem; }
+        .nota .autor { color: var(--accent); font-weight: 600; margin-right: 6px; }
+        .nota .hora { color: var(--text-secondary); font-size: 0.75rem; margin-left: 8px; }
+
+        .nota-form { display: flex; gap: 8px; margin-top: 0.75rem; }
+        .nota-form input { flex: 1; padding: 8px 10px; background: rgba(0,0,0,0.25); border: 1px solid var(--border); color: #fff; border-radius: 6px; font-size: 0.88rem; }
+        .btn-small { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+        .btn-repetir { padding: 8px 14px; background: transparent; border: 1px solid var(--urgente); color: var(--urgente); border-radius: 6px; cursor: pointer; font-size: 0.85rem; margin-left: 8px; }
+        .btn-repetir.activo { background: var(--urgente); color: white; }
     </style>
 </head>
 <body>
     <div id="pantallaLogin" class="login-overlay">
         <div class="login-card">
-            <h2>Inicio de Sesión</h2>
+            <h2>Terminal Lab</h2>
             <input type="text" id="email" value="medico@hospital.com">
             <input type="password" id="password" placeholder="Contraseña">
             <button class="btn-login" onclick="iniciar()">Entrar</button>
@@ -33,9 +72,18 @@
     </div>
 
     <div id="app" class="app-shell" style="display:none;">
-        <h1>🧪 Terminal Lab</h1>
+        <div class="top-bar">
+            <h1>🧪 Terminal Lab</h1>
+            <div class="rol-selector">
+                Actuando como:
+                <select id="rolActual">
+                    <option value="Médico">Médico</option>
+                    <option value="Bioquímico">Bioquímico</option>
+                </select>
+            </div>
+        </div>
 
-        <section class="card form-card">
+        <section class="card">
             <h3>Registro de Nueva Muestra</h3>
             <form id="form-muestra">
                 <input type="text" id="paciente" placeholder="Nombre del paciente" required>
@@ -46,20 +94,16 @@
                     <option value="Glucemia">Glucemia</option>
                     <option value="Hepatograma">Hepatograma</option>
                 </select>
-                <button type="submit" class="btn-primary">Registrar Muestra</button>
+                <button type="submit" class="btn-primary">Registrar</button>
             </form>
         </section>
 
-        <section class="card list-card">
+        <section class="card">
             <h3>Muestras en Laboratorio</h3>
-            <table>
-                <thead>
-                    <tr><th>ID</th><th>Paciente</th><th>Estudio</th><th>Estado</th></tr>
-                </thead>
-                <tbody id="lista-muestras"></tbody>
-            </table>
+            <div id="lista-muestras"></div>
         </section>
     </div>
-   <script src="logica.js"></script>
+
+    <script src="logica.js"></script>
 </body>
 </html>
