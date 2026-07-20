@@ -7,7 +7,7 @@ export default function App() {
   const [rolActual, setRolActual] = useState('Médico');
   const [paciente, setPaciente] = useState('');
   const [tipoAnalisis, setTipoAnalisis] = useState('');
-  const [textoNota, setTextoNota] = useState({}); // Maneja el input de cada muestra de forma independiente
+  const [textoNota, setTextoNota] = useState({}); // Controla los textos de notas por ID de muestra
 
   const [registroMuestras, setRegistroMuestras] = useState([
     {
@@ -28,10 +28,10 @@ export default function App() {
     }
   ]);
 
-  // --- Manejadores de Eventos ---
-  const handleLogin = (e) => {
-    e.preventDefault();
-    setIsLoggedIn(true);
+  // --- Funciones de los Botones ---
+  const manejarLogin = (e) => {
+    e.preventDefault(); // Evita que la página se recargue
+    setIsLoggedIn(true); // Cambia el estado para mostrar la app
   };
 
   const registrarMuestra = (e) => {
@@ -49,8 +49,8 @@ export default function App() {
     };
 
     setRegistroMuestras([...registroMuestras, nuevaMuestra]);
-    setPaciente('');
-    setTipoAnalisis('');
+    setPaciente(''); // Limpia el input de paciente
+    setTipoAnalisis(''); // Limpia el selector
   };
 
   const agregarNota = (id) => {
@@ -69,7 +69,7 @@ export default function App() {
       return muestra;
     }));
 
-    // Limpiar el input específico de esa muestra
+    // Limpia el input específico de esta muestra
     setTextoNota({ ...textoNota, [id]: '' });
   };
 
@@ -82,11 +82,12 @@ export default function App() {
     }));
   };
 
-  // --- Renderizado Condicional: Pantalla de Login ---
+  // --- RENDERIZADO 1: Vista de Login ---
   if (!isLoggedIn) {
     return (
       <div className="login-overlay">
-        <form className="login-card" onSubmit={handleLogin}>
+        {/* Usamos onSubmit para que funcione tanto al hacer click como al dar Enter */}
+        <form className="login-card" onSubmit={manejarLogin}>
           <h2>Terminal Lab</h2>
           <input type="text" defaultValue="medico@hospital.com" />
           <input type="password" placeholder="Contraseña" required />
@@ -96,7 +97,7 @@ export default function App() {
     );
   }
 
-  // --- Renderizado: Aplicación Principal ---
+  // --- RENDERIZADO 2: Aplicación Principal (Si isLoggedIn es true) ---
   return (
     <div className="app-shell">
       <div className="top-bar">
@@ -136,7 +137,7 @@ export default function App() {
         </form>
       </section>
 
-      {/* Listado Dinámico de Muestras */}
+      {/* Muestras */}
       <section className="card">
         <h3>Muestras en Laboratorio</h3>
         <div id="lista-muestras">
@@ -155,7 +156,7 @@ export default function App() {
                 </span>
               </div>
 
-              {/* Hilo de Notas */}
+              {/* Notas de la muestra */}
               <div className="notas-lista">
                 {muestra.notas.length > 0 ? (
                   muestra.notas.map((n, index) => (
@@ -169,7 +170,7 @@ export default function App() {
                 )}
               </div>
 
-              {/* Formulario de Notas y Acciones */}
+              {/* Acciones y Formulario de Notas */}
               <div className="nota-form">
                 <input 
                   type="text" 
@@ -178,10 +179,11 @@ export default function App() {
                   onChange={(e) => setTextoNota({ ...textoNota, [muestra.id]: e.target.value })}
                   onKeyDown={(e) => e.key === 'Enter' && agregarNota(muestra.id)}
                 />
-                <button className="btn-small" onClick={() => agregarNota(muestra.id)}>
+                <button type="button" className="btn-small" onClick={() => agregarNota(muestra.id)}>
                   Enviar
                 </button>
                 <button 
+                  type="button"
                   className={`btn-repetir ${muestra.aRepetir ? 'activo' : ''}`} 
                   onClick={() => toggleRepetir(muestra.id)}
                 >
